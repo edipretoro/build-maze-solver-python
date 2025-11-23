@@ -42,3 +42,38 @@ class Window():
 
     def draw_line(self, line: Line, fill_color: str = "black", width: int = 2):
         line.draw(self.__canvas, color=fill_color, width=width)
+
+
+class Cell():
+    def __init__(self, window: Window):
+        self.__win = window
+        self.has_left_wall = True
+        self.has_right_wall = True
+        self.has_top_wall = True
+        self.has_bottom_wall = True
+        self.__x1 = -1
+        self.__x2 = -1
+        self.__y1 = -1
+        self.__y2 = -1
+
+    def draw(self, x: int, y: int):
+        self.__x1 = x
+        self.__y1 = y
+        self.__x2 = x + 20
+        self.__y2 = y + 20
+
+        if self.has_top_wall:
+            top_line = Line(Point(self.__x1, self.__y1), Point(self.__x2, self.__y1))
+            self.__win.draw_line(top_line)
+
+        if self.has_bottom_wall:
+            bottom_line = Line(Point(self.__x1, self.__y2), Point(self.__x2, self.__y2))
+            self.__win.draw_line(bottom_line)
+
+        if self.has_left_wall:
+            left_line = Line(Point(self.__x1, self.__y1), Point(self.__x1, self.__y2))
+            self.__win.draw_line(left_line)
+
+        if self.has_right_wall:
+            right_line = Line(Point(self.__x2, self.__y1), Point(self.__x2, self.__y2))
+            self.__win.draw_line(right_line)
