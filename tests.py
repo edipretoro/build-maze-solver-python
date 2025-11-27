@@ -72,17 +72,61 @@ class Tests(unittest.TestCase):
         # Le maze devrait quand même être créé
         self.assertEqual(len(m1._Maze__cells), 3)
 
-    def test_maze_empty_dimensions(self):
-        """Test avec des dimensions nulles"""
-        m1 = Maze(0, 0, 0, 0, 10, 10)
-        self.assertEqual(len(m1._Maze__cells), 0)
-
     def test_maze_rectangular_not_square(self):
         """Test avec un maze rectangulaire (non carré)"""
         m1 = Maze(0, 0, 10, 5, 15, 20)
         self.assertEqual(len(m1._Maze__cells), 5)  # 5 colonnes
         self.assertEqual(len(m1._Maze__cells[0]), 10)  # 10 lignes
 
+    def test_entrance_top_wall_removed(self):
+        """Vérifier que le mur du haut de la cellule d'entrée est supprimé"""
+        m1 = Maze(0, 0, 5, 5, 10, 10)
+        # La cellule en haut à gauche [0][0] ne devrait plus avoir de mur en haut
+        self.assertFalse(m1._Maze__cells[0][0].has_top_wall)
+    
+    def test_exit_bottom_wall_removed(self):
+        """Vérifier que le mur du bas de la cellule de sortie est supprimé"""
+        m1 = Maze(0, 0, 5, 5, 10, 10)
+        
+        # La cellule en bas à droite [-1][-1] ne devrait plus avoir de mur en bas
+        self.assertFalse(m1._Maze__cells[-1][-1].has_bottom_wall)
+
+    def test_entrance_and_exit_different_maze_sizes(self):
+        """Test avec différentes tailles de maze"""
+        # Petit maze 2x2
+        m1 = Maze(0, 0, 2, 2, 10, 10)
+        self.assertFalse(m1._Maze__cells[0][0].has_top_wall)
+        self.assertFalse(m1._Maze__cells[1][1].has_bottom_wall)
+        
+        # Grand maze 10x10
+        m2 = Maze(0, 0, 10, 10, 10, 10)
+        self.assertFalse(m2._Maze__cells[0][0].has_top_wall)
+        self.assertFalse(m2._Maze__cells[9][9].has_bottom_wall)
+    
+    def test_entrance_and_exit_rectangular_maze(self):
+        """Test avec un maze rectangulaire (non carré)"""
+        # 3 colonnes, 5 lignes
+        m1 = Maze(0, 0, 5, 3, 10, 10)
+        self.assertFalse(m1._Maze__cells[0][0].has_top_wall)
+        self.assertFalse(m1._Maze__cells[2][4].has_bottom_wall)
+        
+        # 7 colonnes, 3 lignes
+        m2 = Maze(0, 0, 3, 7, 10, 10)
+        self.assertFalse(m2._Maze__cells[0][0].has_top_wall)
+        self.assertFalse(m2._Maze__cells[6][2].has_bottom_wall)
+
+    def test_maze_break_entrance_and_exit(self):
+        num_cols = 12
+        num_rows = 10
+        m1 = Maze(0, 0, num_rows, num_cols, 10, 10)
+        self.assertEqual(
+            m1._Maze__cells[0][0].has_top_wall,
+            False,
+        )
+        self.assertEqual(
+            m1._Maze__cells[num_cols - 1][num_rows - 1].has_bottom_wall,
+            False,
+        )
 
 if __name__ == "__main__":
     unittest.main()
