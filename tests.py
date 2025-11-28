@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import MagicMock, patch
 
 from maze import Maze
 from cell import Cell
@@ -127,6 +128,106 @@ class Tests(unittest.TestCase):
             m1._Maze__cells[num_cols - 1][num_rows - 1].has_bottom_wall,
             False,
         )
+
+
+class TestMazeResetVisited(unittest.TestCase):
+    def setUp(self):
+        """Initialise un labyrinthe 2x2 pour les tests."""
+        self.maze = Maze(
+            x1=0, y1=0,
+            num_rows=2, num_cols=2,
+            cell_size_x=10, cell_size_y=10,
+            win=None,  # Pas de fenêtre pour les tests
+            seed=42    # Graine fixe pour des résultats reproductibles
+        )
+
+    def test_reset_cells_visited_all_true(self):
+        """Teste la réinitialisation quand toutes les cellules sont visitées."""
+        # Marque toutes les cellules comme visitées
+        for row in self.maze._Maze__cells:
+            for cell in row:
+                cell.visited = True
+
+        # Vérifie que toutes sont visitées
+        for row in self.maze._Maze__cells:
+            for cell in row:
+                self.assertTrue(cell.visited)
+
+        # Réinitialise
+        self.maze._Maze__reset_cells_visited()
+
+        # Vérifie que toutes sont non visitées
+        for row in self.maze._Maze__cells:
+            for cell in row:
+                self.assertFalse(cell.visited)
+
+    def test_reset_cells_visited_mixed(self):
+        """Teste la réinitialisation avec des cellules partiellement visitées."""
+        # Marque certaines cellules comme visitées
+        self.maze._Maze__cells[0][0].visited = True
+        self.maze._Maze__cells[0][1].visited = False
+        self.maze._Maze__cells[1][0].visited = False
+        self.maze._Maze__cells[1][1].visited = True
+
+        # Réinitialise
+        self.maze._Maze__reset_cells_visited()
+
+        # Vérifie que toutes sont non visitées
+        for row in self.maze._Maze__cells:
+            for cell in row:
+                self.assertFalse(cell.visited)
+
+    def test_reset_cells_visited_empty_maze(self):
+        """Teste avec un labyrinthe vide (cas limite)."""
+        # Crée un labyrinthe 0x0 (vide)
+        empty_maze = Maze(
+            x1=0, y1=0,
+            num_rows=0, num_cols=0,
+            cell_size_x=10, cell_size_y=10,
+            win=None
+        )
+        # Ne doit pas lever d'erreur
+        empty_maze._Maze__reset_cells_visited()
+
+    def test_reset_cells_visited_large_maze(self):
+        """Teste avec un grand labyrinthe (10x10)."""
+        large_maze = Maze(
+            x1=0, y1=0,
+            num_rows=10, num_cols=10,
+            cell_size_x=10, cell_size_y=10,
+            win=None,
+            seed=42
+        )
+        # Marque toutes les cellules comme visitées
+        for row in large_maze._Maze__cells:
+            for cell in row:
+                cell.visited = True
+
+        # Réinitialise
+        large_maze._Maze__reset_cells_visited()
+
+        # Vérifie que toutes sont non visitées
+        for row in large_maze._Maze__cells:
+            for cell in row:
+                self.assertFalse(cell.visited)
+
+    @patch('random.seed')  # Mock pour éviter les effets de bord
+    def test_reset_after_break_walls_r(self, mock_seed):
+        """Teste que la réinitialisation fonctionne après __break_walls_r."""
+        maze = Maze(
+            x1=0, y1=0,
+            num_rows=3, num_cols=3,
+            cell_size_x=10, cell_size_y=10,
+            win=None,
+            seed=42
+        )
+        # __break_walls_r marque certaines cellules comme visitées
+        # On vérifie que __reset_cells_visited les réinitialise toutes
+        maze._Maze__reset_cells_visited()
+        for row in maze._Maze__cells:
+            for cell in row:
+                self.assertFalse(cell.visited)    
+
 
 if __name__ == "__main__":
     unittest.main()
